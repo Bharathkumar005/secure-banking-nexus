@@ -3,6 +3,8 @@ import AccountCard from "@/components/banking/AccountCard";
 import TransactionList from "@/components/banking/TransactionList";
 import { useToast } from "@/hooks/use-toast";
 import TransferDialog from "@/components/banking/TransferDialog";
+import DepositDialog from "@/components/banking/DepositDialog";
+import WithdrawDialog from "@/components/banking/WithdrawDialog";
 
 type Transaction = {
   id: string;
@@ -16,6 +18,8 @@ const Index = () => {
   const { toast } = useToast();
   const [balance, setBalance] = useState(25420.55);
   const [isTransferOpen, setIsTransferOpen] = useState(false);
+  const [isDepositOpen, setIsDepositOpen] = useState(false);
+  const [isWithdrawOpen, setIsWithdrawOpen] = useState(false);
   const [transactions, setTransactions] = useState<Transaction[]>([
     {
       id: "1",
@@ -73,8 +77,7 @@ const Index = () => {
     }
   };
 
-  const handleDeposit = () => {
-    const amount = 500; // Example amount
+  const handleDeposit = (amount: number) => {
     const newTransaction: Transaction = {
       id: (transactions.length + 1).toString(),
       type: "credit",
@@ -92,8 +95,7 @@ const Index = () => {
     });
   };
 
-  const handleWithdraw = () => {
-    const amount = 200; // Example amount
+  const handleWithdraw = (amount: number) => {
     if (balance >= amount) {
       const newTransaction: Transaction = {
         id: (transactions.length + 1).toString(),
@@ -129,14 +131,24 @@ const Index = () => {
           balance={balance}
           accountNumber="1234567890"
           onTransfer={() => setIsTransferOpen(true)}
-          onDeposit={handleDeposit}
-          onWithdraw={handleWithdraw}
+          onDeposit={() => setIsDepositOpen(true)}
+          onWithdraw={() => setIsWithdrawOpen(true)}
         />
         <TransactionList transactions={transactions} />
         <TransferDialog 
           open={isTransferOpen}
           onOpenChange={setIsTransferOpen}
           onTransfer={handleTransfer}
+        />
+        <DepositDialog
+          open={isDepositOpen}
+          onOpenChange={setIsDepositOpen}
+          onDeposit={handleDeposit}
+        />
+        <WithdrawDialog
+          open={isWithdrawOpen}
+          onOpenChange={setIsWithdrawOpen}
+          onWithdraw={handleWithdraw}
         />
       </div>
     </div>
