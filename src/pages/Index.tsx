@@ -1,12 +1,20 @@
 import { useState } from "react";
 import AccountCard from "@/components/banking/AccountCard";
 import TransactionList from "@/components/banking/TransactionList";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
+
+type Transaction = {
+  id: string;
+  type: "credit" | "debit";
+  amount: number;
+  description: string;
+  date: string;
+};
 
 const Index = () => {
   const { toast } = useToast();
-  const [balance] = useState(25420.55);
-  const [transactions] = useState([
+  const [balance, setBalance] = useState(25420.55);
+  const [transactions, setTransactions] = useState<Transaction[]>([
     {
       id: "1",
       type: "credit",
@@ -38,24 +46,76 @@ const Index = () => {
   ]);
 
   const handleTransfer = () => {
-    toast({
-      title: "Transfer",
-      description: "Transfer feature coming soon!",
-    });
+    const amount = 100; // Example amount
+    if (balance >= amount) {
+      const newTransaction: Transaction = {
+        id: (transactions.length + 1).toString(),
+        type: "debit",
+        amount: amount,
+        description: "Transfer to Account",
+        date: new Date().toISOString().split('T')[0],
+      };
+      
+      setBalance(prev => prev - amount);
+      setTransactions(prev => [newTransaction, ...prev]);
+      
+      toast({
+        title: "Transfer Successful",
+        description: `$${amount} has been transferred successfully.`,
+      });
+    } else {
+      toast({
+        title: "Transfer Failed",
+        description: "Insufficient balance.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleDeposit = () => {
+    const amount = 500; // Example amount
+    const newTransaction: Transaction = {
+      id: (transactions.length + 1).toString(),
+      type: "credit",
+      amount: amount,
+      description: "Cash Deposit",
+      date: new Date().toISOString().split('T')[0],
+    };
+    
+    setBalance(prev => prev + amount);
+    setTransactions(prev => [newTransaction, ...prev]);
+    
     toast({
-      title: "Deposit",
-      description: "Deposit feature coming soon!",
+      title: "Deposit Successful",
+      description: `$${amount} has been deposited to your account.`,
     });
   };
 
   const handleWithdraw = () => {
-    toast({
-      title: "Withdraw",
-      description: "Withdraw feature coming soon!",
-    });
+    const amount = 200; // Example amount
+    if (balance >= amount) {
+      const newTransaction: Transaction = {
+        id: (transactions.length + 1).toString(),
+        type: "debit",
+        amount: amount,
+        description: "Cash Withdrawal",
+        date: new Date().toISOString().split('T')[0],
+      };
+      
+      setBalance(prev => prev - amount);
+      setTransactions(prev => [newTransaction, ...prev]);
+      
+      toast({
+        title: "Withdrawal Successful",
+        description: `$${amount} has been withdrawn from your account.`,
+      });
+    } else {
+      toast({
+        title: "Withdrawal Failed",
+        description: "Insufficient balance.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
