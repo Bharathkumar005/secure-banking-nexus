@@ -2,6 +2,7 @@ import { useState } from "react";
 import AccountCard from "@/components/banking/AccountCard";
 import TransactionList from "@/components/banking/TransactionList";
 import { useToast } from "@/hooks/use-toast";
+import TransferDialog from "@/components/banking/TransferDialog";
 
 type Transaction = {
   id: string;
@@ -14,6 +15,7 @@ type Transaction = {
 const Index = () => {
   const { toast } = useToast();
   const [balance, setBalance] = useState(25420.55);
+  const [isTransferOpen, setIsTransferOpen] = useState(false);
   const [transactions, setTransactions] = useState<Transaction[]>([
     {
       id: "1",
@@ -45,14 +47,13 @@ const Index = () => {
     },
   ]);
 
-  const handleTransfer = () => {
-    const amount = 100; // Example amount
+  const handleTransfer = (amount: number, accountId: string) => {
     if (balance >= amount) {
       const newTransaction: Transaction = {
         id: (transactions.length + 1).toString(),
         type: "debit",
         amount: amount,
-        description: "Transfer to Account",
+        description: `Transfer to Account ${accountId}`,
         date: new Date().toISOString().split('T')[0],
       };
       
@@ -61,7 +62,7 @@ const Index = () => {
       
       toast({
         title: "Transfer Successful",
-        description: `$${amount} has been transferred successfully.`,
+        description: `$${amount} has been transferred to account ${accountId}.`,
       });
     } else {
       toast({
@@ -127,11 +128,16 @@ const Index = () => {
         <AccountCard
           balance={balance}
           accountNumber="1234567890"
-          onTransfer={handleTransfer}
+          onTransfer={() => setIsTransferOpen(true)}
           onDeposit={handleDeposit}
           onWithdraw={handleWithdraw}
         />
         <TransactionList transactions={transactions} />
+        <TransferDialog 
+          open={isTransferOpen}
+          onOpenChange={setIsTransferOpen}
+          onTransfer={handleTransfer}
+        />
       </div>
     </div>
   );
