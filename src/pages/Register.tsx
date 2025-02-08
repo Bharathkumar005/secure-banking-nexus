@@ -40,6 +40,13 @@ const Register = () => {
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsLoading(true);
     try {
+      console.log('Attempting to register with:', { email: values.email, name: values.name });
+      
+      // Check network connectivity
+      if (!navigator.onLine) {
+        throw new Error('No internet connection. Please check your network and try again.');
+      }
+
       const { data, error } = await supabase.auth.signUp({
         email: values.email,
         password: values.password,
@@ -50,9 +57,14 @@ const Register = () => {
         },
       });
 
+      console.log('Registration response:', { data, error });
+
       if (error) {
         if (error.message.includes('network')) {
           throw new Error('Network error. Please check your internet connection and try again.');
+        }
+        if (error.message.includes('Email rate limit exceeded')) {
+          throw new Error('Too many attempts. Please try again later.');
         }
         throw error;
       }
