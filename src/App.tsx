@@ -1,20 +1,17 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { createClient } from '@supabase/supabase-js';
 import { useState, useEffect } from 'react';
+import { supabase } from './lib/supabase';
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
-const supabase = createClient(
-  'https://rxtlwjxoylkzajvvoyck.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ4dGx3anhveWxremFqdnZveWNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTA0MDA4NzksImV4cCI6MjAyNTk3Njg3OX0.IwMqHK1a6i2mWpWL2XbPaB_0u7MXThNWLY4EbDnhIbk'
-);
 
 interface ProtectedRouteProps {
   children: React.ReactNode;

@@ -4,7 +4,6 @@ import { useNavigate, Link } from "react-router-dom";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { createClient } from '@supabase/supabase-js';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -16,17 +15,13 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from '@/lib/supabase';
 
 const formSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Invalid email address"),
   password: z.string().min(6, "Password must be at least 6 characters"),
 });
-
-const supabase = createClient(
-  'https://rxtlwjxoylkzajvvoyck.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ4dGx3anhveWxremFqdnZveWNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTA0MDA4NzksImV4cCI6MjAyNTk3Njg3OX0.IwMqHK1a6i2mWpWL2XbPaB_0u7MXThNWLY4EbDnhIbk'
-);
 
 const Register = () => {
   const { toast } = useToast();
@@ -55,18 +50,27 @@ const Register = () => {
         },
       });
 
-      if (error) throw error;
+      if (error) {
+        if (error.message.includes('network')) {
+          throw new Error('Network error. Please check your internet connection and try again.');
+        }
+        throw error;
+      }
 
-      toast({
-        title: "Registration successful!",
-        description: "Please check your email to verify your account.",
-      });
-      
-      navigate("/login");
+      if (data?.user) {
+        toast({
+          title: "Registration successful!",
+          description: "Please check your email to verify your account.",
+        });
+        navigate("/login");
+      } else {
+        throw new Error('Registration failed. Please try again.');
+      }
     } catch (error: any) {
+      console.error('Registration error:', error);
       toast({
         title: "Registration failed",
-        description: error.message,
+        description: error.message || 'An unexpected error occurred. Please try again.',
         variant: "destructive",
       });
     } finally {

@@ -4,7 +4,6 @@ import { useNavigate, Link } from "react-router-dom";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { createClient } from '@supabase/supabase-js';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -16,16 +15,12 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from '@/lib/supabase';
 
 const formSchema = z.object({
   email: z.string().email("Invalid email address"),
   password: z.string().min(1, "Password is required"),
 });
-
-const supabase = createClient(
-  'https://rxtlwjxoylkzajvvoyck.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ4dGx3anhveWxremFqdnZveWNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTA0MDA4NzksImV4cCI6MjAyNTk3Njg3OX0.IwMqHK1a6i2mWpWL2XbPaB_0u7MXThNWLY4EbDnhIbk'
-);
 
 const Login = () => {
   const { toast } = useToast();
@@ -48,18 +43,27 @@ const Login = () => {
         password: values.password,
       });
 
-      if (error) throw error;
+      if (error) {
+        if (error.message.includes('network')) {
+          throw new Error('Network error. Please check your internet connection and try again.');
+        }
+        throw error;
+      }
 
-      toast({
-        title: "Login successful!",
-        description: "Welcome back!",
-      });
-      
-      navigate("/");
+      if (data?.user) {
+        toast({
+          title: "Login successful!",
+          description: "Welcome back!",
+        });
+        navigate("/");
+      } else {
+        throw new Error('Login failed. Please try again.');
+      }
     } catch (error: any) {
+      console.error('Login error:', error);
       toast({
         title: "Login failed",
-        description: error.message,
+        description: error.message || 'An unexpected error occurred. Please try again.',
         variant: "destructive",
       });
     } finally {
