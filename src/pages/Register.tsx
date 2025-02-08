@@ -54,6 +54,7 @@ const Register = () => {
           data: {
             name: values.name,
           },
+          emailRedirectTo: window.location.origin + '/login'
         },
       });
 
